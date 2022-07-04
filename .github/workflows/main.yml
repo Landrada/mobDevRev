@@ -23,14 +23,61 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: checkout
+        uses: actions/checkout@v3
+      #login to deockerhub
+      - name: Login to docker
+        uses: docker/login-actionv1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      # Set up docker buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Client Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ./simplefrontend
+          file: ./simplefrontend/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/simplefrontend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/simplefrontend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/simplefrontend:buildcache,mode=max
+
+      - name: nginx Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ./nginx
+          file: ./nginx/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/nginx:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/nginx:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/nginx:buildcache,mode=max
+
+         # |Server component build and push it to docker hub
+      - name: backend Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/backend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/backend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/backend:buildcache,mode=max
+      # |Server component build and push it to docker hub
+
+      - name: Mongo db Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/mongodb:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/backend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/backend:buildcache,mode=max
