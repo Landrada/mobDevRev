@@ -1,0 +1,157 @@
+{
+    "swagger":"2.0",
+    "info": {
+        "version":"1.0.0",
+        "title":"Student APIs",
+        "description": "Simple student APIs documentation"
+    },
+    "host":"localhost:4560",
+    "basepath": "/",
+    "tags":[
+        {
+            "name": "Students",
+            "description":"APIs for students"
+        }
+    ],
+    "schemes":["http"],
+    "consumes":["apllication/json"],
+    "produces":["application/json"],
+    "paths": {
+        "/student":{
+            "post":{
+                "tags":["Students"],
+                "summary":"create new student",
+                "parameters":[
+                    {
+                        "name":"Students",
+                        "in":"body",
+                        "description": "Student to be inserted",
+                        "schema":{
+                            "type":"object",
+                            "required":["firstName","lastName","province"],
+                            "properties":{
+                                "firstName":{
+                                    "type":"string"
+                                },
+                                "lastName":{
+                                    "type":"string"
+                                },
+                                "province":{
+                                    "type":"string"
+                                }
+                            }
+                        },
+                        "required":true
+                    }
+                ],
+              
+                "responses":{
+                    "201":{
+                        "description": "New student created",
+                        "schema":{
+                            "type":"object"
+                        }
+                    }
+                }
+            },
+            "get":{
+                "tags":["Students"],
+                "summary":"Get all students",
+                "responses":{
+                    "200":{
+                        "description":"OK",
+                        "schema":{
+                            
+                                "$ref":"#/definitions/Student"
+                            
+                        }
+                    }
+                }
+            }
+        },
+        "/student/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in":"path",
+                    "required": true,
+                    "description":"ID of the student",
+                    "type":"string"
+                }
+            ],
+            "get":{
+                "tags":["Students"],
+                "summary":"Get student with given id",
+                "responses":{
+                    "200":{
+                        "description":"Student found",
+                        "schema":{
+                            "$ref":"#/definitions/Student"
+                        }
+                    }
+                }
+            },
+            "put":{
+                "summary":"Update student with given id",
+                "tags":["Students"],
+                "parameters":[
+                    {
+                        "name":"student",
+                        "in":"body",
+                        "description":"New student details",
+                        "schema":{
+                            "type":"object",
+                            "properties":{
+                                "firstName":{
+                                    "type":"string"
+                                },
+                                "lastName":{
+                                    "type":"string"
+                                },
+                                "province":{
+                                    "type":"string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses":{
+                    "200":{
+                        "description":"Student updated",
+                        "schema":{
+                            "$ref":"#/definitions/Student"
+                        }
+                    }
+                }
+            },
+            "delete":{
+                "summary":"Delete Student with given iD",
+                "tags":["Students"],
+                "responses":{
+                    "200":{
+                        "description":"Student is deleted",
+                        "schema":{
+                            "type":"object"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions":{
+        "Student":{
+            "required":["firstName","lastName","province"],
+            "properties":{
+                "firstName":{
+                    "type":"string"
+                },
+                "lastName":{
+                    "type":"string"
+                },
+                "province":{
+                    "type":"string"
+                }
+            }
+        }
+    }
+}
